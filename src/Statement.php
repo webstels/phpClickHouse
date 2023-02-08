@@ -254,24 +254,28 @@ class Statement implements \Iterator
             }
         }
 
-        if (empty($this->meta)) {
+        if (empty($this->meta) && !is_string($this->_rawData)) {
             throw new QueryException('Can`t find meta');
         }
 
-        $isJSONCompact=(stripos($this->format,'JSONCompact')!==false?true:false);
+        $isJSONCompact = (stripos($this->format, 'JSONCompact') !== false ? true : false);
         $this->array_data = [];
-        foreach ($data as $rows) {
-            $r = [];
+        if (is_string($this->_rawData)) {
+            $this->array_data[] = ['message' => json_decode($this->_rawData, 1)];
+        } else {
+            foreach ($data as $rows) {
+                $r = [];
 
-            if ($isJSONCompact) {
-                $r[] = $rows;
-            } else {
-                foreach ($this->meta as $meta) {
-                    $r[$meta['name']] = $rows[$meta['name']];
+                if ($isJSONCompact) {
+                    $r[] = $rows;
+                } else {
+                    foreach ($this->meta as $meta) {
+                        $r[$meta['name']] = $rows[$meta['name']];
+                    }
                 }
-            }
 
-            $this->array_data[] = $r;
+                $this->array_data[] = $r;
+            }
         }
 
         $this->_init = true;
