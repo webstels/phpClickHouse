@@ -261,7 +261,16 @@ class Statement implements \Iterator
         $isJSONCompact = (stripos($this->format, 'JSONCompact') !== false ? true : false);
         $this->array_data = [];
         if (is_string($this->_rawData)) {
-            $this->array_data[] = ['message' => json_decode($this->_rawData, 1)];
+            $tmp = str_replace('}', '}\n', str_replace('\\', '', $this->_rawData));
+            $tmp = explode('\n', $tmp);
+            $tmp_data = [];
+            foreach ($tmp as $row) {
+                $r = json_decode($row, 1);
+                if($r) {
+                    $tmp_data[] = ['message' => json_decode($row, 1)];
+                }
+            }
+            $this->array_data = $tmp_data;
         } else {
             foreach ($data as $rows) {
                 $r = [];
